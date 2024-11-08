@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Posts - Tutorials</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #FFFFFF;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: left;
+        }
+        .container {
+            width: 80%;
+            max-width: 700px;
+            margin: 20px;
+            padding: 20px;
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #BB86FC;
+            margin-bottom: 20px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin-bottom: 15px;
+        }
+        a {
+            color: #BB86FC;
+            text-decoration: none;
+            font-size: 1.1em;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        p {
+            color: #E6E6E6;
+        }
+        hr {
+            border: 0;
+            height: 1px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0));
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Posts</h1>
+        <hr>
+        <ul>
+            <li>
+                <a href="/posts/change-hostname.html">Change Debian/Ubuntu Hostname</a>
+                <p>A quick guide to changing the hostname on Debian/Ubuntu systems.</p>
+            </li>
+            <li>
+                <a href="/posts/docker-portainer.html">Install Docker and Portainer on Debian</a>
+                <p>Step-by-step instructions for installing Docker and Portainer on a Debian system.</p>
+            </li>
+            <li>
+                <a href="/posts/ssh.html">SSH Key-Based Authentication Setup (Debian/Ubuntu)</a>
+                <p>Setup guide for enabling SSH key-based authentication for secure access.</p>
+            </li>
+            <li>
+                <a href="/posts/vaultwarden.html">Automated Vaultwarden Vault Exporting/Backups</a>
+                <p>Create an automated, password-protected backup script for Vaultwarden.</p>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>
