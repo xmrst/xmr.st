@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SSH Key-Based Authentication Setup (Debian/Ubuntu)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #FFFFFF;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            text-align: left;
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 20px;
+            padding: 20px;
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        h1, h2 {
+            color: #BB86FC;
+        }
+        p, li {
+            color: #E6E6E6;
+        }
+        a {
+            color: #BB86FC;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        code {
+            font-family: monospace;
+            background-color: #282828;
+            color: #F1F1F1;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+        .code-container, .code-block {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #333333;
+            padding: 8px;
+            border-radius: 4px;
+            margin: 10px 0;
+            position: relative;
+        }
+        .copy-btn {
+            background-color: #BB86FC;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .copy-btn:hover {
+            background-color: #9f6bd9;
+        }
+        pre {
+            background-color: #282828;
+            color: #F1F1F1;
+            padding: 10px;
+            border-radius: 8px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        hr {
+            border: 0;
+            height: 1px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0));
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SSH Key-Based Authentication Setup (Debian/Ubuntu)</h1>
+        <hr>
+        <p>This script is for setting up SSH key-based authentication on a server, ensuring secure remote access without using passwords. This method enhances security by allowing only those who possess the private key to log in. Below are the steps to install and configure the OpenSSH server and set up key-based authentication. This guide assumes you've already set up your SSH keys and have both the public and private keys ready.</p>
+        <h2>Step 1: Install OpenSSH Server</h2>
+        <p>Install the OpenSSH server to enable SSH connections to your server:</p>
+        <div class="code-container">
+            <code>sudo apt-get install openssh-server</code>
+            <button class="copy-btn" onclick="copyToClipboard('sudo apt-get install openssh-server')">Copy</button>
+        </div>
+        <h2>Step 2: Add Your Public Key to the Server</h2>
+        <p>Add your public SSH key to the server to enable key-based authentication:</p>
+        <div class="code-container">
+            <code>nano ~/.ssh/authorized_keys</code>
+            <button class="copy-btn" onclick="copyToClipboard('nano ~/.ssh/authorized_keys')">Copy</button>
+        </div>
+        <p>Paste your public key into the opened file. Save and exit (in nano, press <code>Ctrl + X</code>, then <code>Y</code>, and <code>Enter</code>).</p>
+        <h2>Step 3: Set Permissions on .ssh Directory and authorized_keys File</h2>
+        <p>Proper permissions are crucial for SSH to function securely:</p>
+        <div class="code-container">
+            <code>chmod 700 ~/.ssh</code>
+            <button class="copy-btn" onclick="copyToClipboard('chmod 700 ~/.ssh')">Copy</button>
+        </div>
+        <div class="code-container">
+            <code>chmod 600 ~/.ssh/authorized_keys</code>
+            <button class="copy-btn" onclick="copyToClipboard('chmod 600 ~/.ssh/authorized_keys')">Copy</button>
+        </div>
+        <h2>Step 4: Configure SSH Daemon</h2>
+        <p>Adjust SSH daemon settings to enhance security:</p>
+        <div class="code-container">
+            <code>sudo nano /etc/ssh/sshd_config</code>
+            <button class="copy-btn" onclick="copyToClipboard('sudo nano /etc/ssh/sshd_config')">Copy</button>
+        </div>
+        <p>Add the following lines or update them as needed:</p>
+        <div class="code-block">
+            <pre id="sshd-config">
+PermitRootLogin prohibit-password
+PubkeyAuthentication yes
+AuthorizedKeysFile .ssh/authorized_keys
+PasswordAuthentication no
+ChallengeResponseAuthentication no
+UsePAM no
+            </pre>
+            <button class="copy-btn" onclick="copyToClipboard(document.getElementById('sshd-config').innerText)">Copy</button>
+        </div>
+        <p>Save and exit (in nano, press <code>Ctrl + X</code>, then <code>Y</code>, and <code>Enter</code>).</p>
+        <h2>Step 5: Restart SSH Service</h2>
+        <p>Restart the SSH service to apply the configuration changes:</p>
+        <div class="code-container">
+            <code>sudo systemctl restart sshd</code>
+            <button class="copy-btn" onclick="copyToClipboard('sudo systemctl restart sshd')">Copy</button>
+        </div>
+        <p>This streamlined tutorial includes all the necessary steps to set up SSH key-based authentication and secure your server.</p>
+    </div>
+
+    <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                alert('Copied to clipboard');
+            }, function() {
+                alert('Failed to copy');
+            });
+        }
+    </script>
+</body>
+</html>

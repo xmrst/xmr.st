@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Install Docker and Portainer on Debian</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #FFFFFF;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            text-align: left;
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 20px;
+            padding: 20px;
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        h1, h2 {
+            color: #BB86FC;
+        }
+        p, li {
+            color: #E6E6E6;
+        }
+        a {
+            color: #BB86FC;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        code {
+            font-family: monospace;
+            background-color: #282828;
+            color: #F1F1F1;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+        .code-container, .code-block {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #333333;
+            padding: 8px;
+            border-radius: 4px;
+            margin: 10px 0;
+            position: relative;
+        }
+        .copy-btn {
+            background-color: #BB86FC;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .copy-btn:hover {
+            background-color: #9f6bd9;
+        }
+        pre {
+            background-color: #282828;
+            color: #F1F1F1;
+            padding: 10px;
+            border-radius: 8px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        hr {
+            border: 0;
+            height: 1px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0));
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Install Docker and Portainer on Debian</h1>
+        <hr>
+        <h2>1. Create the Script</h2>
+        <p>Open your terminal and create a new script:</p>
+        <div class="code-container">
+            <code>sudo nano install_docker_portainer.sh</code>
+            <button class="copy-btn" onclick="copyToClipboard('sudo nano install_docker_portainer.sh')">Copy</button>
+        </div>
+        <h2>2. Add the Code</h2>
+        <p>Inside the nano editor, paste the following script:</p>
+        <div class="code-block">
+            <pre id="docker-script">
+#!/bin/bash
+
+# Update the package list to ensure we have the latest information on available packages
+sudo apt update
+
+# Install prerequisites for Docker, such as packages for secure APT and transport protocols
+sudo apt install -y apt-transport-https ca-certificates curl gnupg lsb-release
+
+# Add Docker’s official GPG key for package verification
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+# Add Docker’s official repository to the APT sources list
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# Update the package list again to include Docker packages from the newly added repository
+sudo apt update
+
+# Install Docker Engine, CLI, and containerd packages
+sudo apt install -y docker-ce docker-ce-cli containerd.io
+
+# Install Docker Compose from the official GitHub repository
+# Fetch the latest version number dynamically from the GitHub API and download the corresponding binary
+sudo curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep -oP '(?<=tag_name\": \")[0-9a-zA-Z.-]+')" -o /usr/local/bin/docker-compose
+
+# Apply executable permissions to the Docker Compose binary
+sudo chmod +x /usr/local/bin/docker-compose
+
+# Create a Docker group to allow running Docker commands without sudo
+sudo groupadd docker
+
+# Add the current user to the Docker group
+sudo usermod -aG docker $USER
+
+# Pull the latest Portainer image from the Docker Hub
+sudo docker pull portainer/portainer-ce:latest
+
+# Create a Docker volume for Portainer data
+sudo docker volume create portainer_data
+
+# Create and start a Portainer container
+# Portainer will be accessible on port 9000 and will restart automatically if the system reboots
+sudo docker run -d -p 9000:9000 --name portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce:latest
+
+# Print installation details to the terminal
+echo "Docker, Docker Compose, and Portainer have been installed."
+echo "Portainer is accessible on port 9000."
+
+# Inform the user to log out and log back in for the Docker group membership changes to take effect
+echo "Please log out and log back in to apply the Docker group membership changes."
+            </pre>
+            <button class="copy-btn" onclick="copyToClipboard(document.getElementById('docker-script').innerText)">Copy</button>
+        </div>
+        <p>Save the file by pressing <code>Ctrl + O</code>, then press <code>Enter</code>, and exit nano by pressing <code>Ctrl + X</code>.</p>
+        <h2>3. Make the Script Executable</h2>
+        <p>Make your script executable:</p>
+        <div class="code-container">
+            <code>sudo chmod +x install_docker_portainer.sh</code>
+            <button class="copy-btn" onclick="copyToClipboard('sudo chmod +x install_docker_portainer.sh')">Copy</button>
+        </div>
+        <h2>4. Run the Installation Script</h2>
+        <p>Run the script:</p>
+        <div class="code-container">
+            <code>sudo ./install_docker_portainer.sh</code>
+            <button class="copy-btn" onclick="copyToClipboard('sudo ./install_docker_portainer.sh')">Copy</button>
+        </div>
+        <p>Follow the on-screen instructions. You will need to log out and log back in for the Docker group membership changes to take effect.</p>
+    </div>
+
+    <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                alert('Copied to clipboard');
+            }, function() {
+                alert('Failed to copy');
+            });
+        }
+    </script>
+</body>
+</html>

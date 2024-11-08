@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Automated Vaultwarden Vault Exporting/Backups</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #FFFFFF;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            text-align: left;
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 20px;
+            padding: 20px;
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        h1, h2 {
+            color: #BB86FC;
+        }
+        p, li {
+            color: #E6E6E6;
+        }
+        a {
+            color: #BB86FC;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        code {
+            font-family: monospace;
+            background-color: #282828;
+            color: #F1F1F1;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+        .code-container, .code-block {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #333333;
+            padding: 8px;
+            border-radius: 4px;
+            margin: 10px 0;
+            position: relative;
+        }
+        .copy-btn {
+            background-color: #BB86FC;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .copy-btn:hover {
+            background-color: #9f6bd9;
+        }
+        pre {
+            background-color: #282828;
+            color: #F1F1F1;
+            padding: 10px;
+            border-radius: 8px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        hr {
+            border: 0;
+            height: 1px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0));
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Automated Vaultwarden Vault Exporting/Backups</h1>
+        <hr>
+        <p>This guide will walk you through the steps to create an automated, password-protected backup script for your Vaultwarden vault. This ensures that your vault backup is not only up-to-date but also securely stored.</p>
+        <h2>Warning</h2>
+        <p>Storing your vault password in plain text poses a significant security risk. Proceed with caution and understand the risks involved.</p>
+        <h2>Prerequisites</h2>
+        <ul>
+            <li>You have sudo privileges on your machine.</li>
+            <li>Vaultwarden is installed and running.</li>
+            <li>Your environment is either Debian or Ubuntu.</li>
+        </ul>
+        <h2>1. Install Required Packages</h2>
+        <div class="code-container">
+            <code>sudo apt install snapd && sudo snap install bw</code>
+            <button class="copy-btn" onclick="copyToClipboard('sudo apt install snapd && snap install bw')">Copy</button>
+        </div>
+        <p>After installing bw, ensure that the /snap/bin directory is included in your system's PATH environment variable:</p>
+        <div class="code-container">
+            <code>echo 'export PATH=$PATH:/snap/bin' >> ~/.bashrc</code>
+            <button class="copy-btn" onclick="copyToClipboard('echo \'export PATH=$PATH:/snap/bin\' >> ~/.bashrc')">Copy</button>
+        </div>
+        <p>Apply the changes by running:</p>
+        <div class="code-container">
+            <code>source ~/.bashrc</code>
+            <button class="copy-btn" onclick="copyToClipboard('source ~/.bashrc')">Copy</button>
+        </div>
+        <div class="code-container">
+            <code>sudo apt-get update && sudo apt-get install -y jq</code>
+            <button class="copy-btn" onclick="copyToClipboard('sudo apt-get update && sudo apt-get install -y jq')">Copy</button>
+        </div>
+        <h2>2. Create the Necessary Directories</h2>
+        <div class="code-container">
+            <code>mkdir -p ~/vaultwarden/scripts</code>
+            <button class="copy-btn" onclick="copyToClipboard('mkdir -p ~/vaultwarden/scripts')">Copy</button>
+        </div>
+        <div class="code-container">
+            <code>mkdir -p ~/vaultwarden/exports</code>
+            <button class="copy-btn" onclick="copyToClipboard('mkdir -p ~/vaultwarden/exports')">Copy</button>
+        </div>
+        <h2>3. Configure Vaultwarden Server</h2>
+        <div class="code-container">
+            <code>bw config server "https://vaultwarden.example.com"</code>
+            <button class="copy-btn" onclick="copyToClipboard('bw config server \"https://vaultwarden.example.com\"')">Copy</button>
+        </div>
+        <h2>4. Create the Backup Script</h2>
+        <p>Open a new file in the scripts directory:</p>
+        <div class="code-container">
+            <code>nano ~/vaultwarden/scripts/bitwarden_backup.sh</code>
+            <button class="copy-btn" onclick="copyToClipboard('nano ~/vaultwarden/scripts/bitwarden_backup.sh')">Copy</button>
+        </div>
+        <p>In the file, paste the following code:</p>
+        <div class="code-block">
+            <pre id="backup-script">
+#!/bin/bash
+
+export PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/snap/bin
+
+# Setup logging
+LOGFILE="$HOME/vaultwarden/scripts/bitwarden_backup.log"
+exec > >(tee -a $LOGFILE) 2>&1
+
+echo "=== $(date) ==="
+echo "Starting Vaultwarden backup process..."
+
+# Bitwarden credentials
+export BW_EMAIL="changeme"
+export BW_PASSWORD="changeme"
+EXPORT_PASSWORD="changeme"
+
+# Login to Bitwarden and get session key
+BW_SESSION=$(bw login --raw --passwordenv BW_PASSWORD $BW_EMAIL)
+if [ $? -ne 0 ]; then
+  echo "[$(date)] Error: Failed to login to Bitwarden."
+  exit 1
+fi
+echo "[$(date)] Successfully logged into Bitwarden."
+export BW_SESSION
+
+# Unlock the vault
+echo $BW_PASSWORD | bw unlock --raw --passwordenv BW_PASSWORD --session $BW_SESSION > /tmp/bw_session_unlocked
+if [ $? -ne 0 ]; then
+  echo "[$(date)] Error: Failed to unlock Bitwarden vault."
+  exit 1
+fi
+echo "[$(date)] Vault unlocked successfully."
+BW_SESSION=$(cat /tmp/bw_session_unlocked)
+
+# Export the vault with password protection
+bw export --format encrypted_json --raw 1> "$HOME/vaultwarden/exports/vaultwarden-backup.json" --password $EXPORT_PASSWORD --session $BW_SESSION
+if [ $? -ne 0 ]; then
+  echo "[$(date)] Error: Failed to export Bitwarden vault."
+  exit 1
+fi
+echo "[$(date)] Vault exported successfully to $HOME/vaultwarden/exports/vaultwarden-backup.json."
+
+# Logout from Bitwarden
+bw logout --session $BW_SESSION
+if [ $? -ne 0 ]; then
+  echo "[$(date)] Error: Failed to log out from Bitwarden."
+  exit 1
+fi
+echo "[$(date)] Successfully logged out from Bitwarden."
+
+# Cleanup
+rm /tmp/bw_session /tmp/bw_session_unlocked
+echo "[$(date)] Cleanup completed."
+
+echo "Backup process finished successfully."
+            </pre>
+            <button class="copy-btn" onclick="copyToClipboard(document.getElementById('backup-script').innerText)">Copy</button>
+        </div>
+        <p>Replace the placeholders: <code>BW_EMAIL</code>, <code>BW_PASSWORD</code>, and <code>EXPORT_PASSWORD</code> with your credentials.</p>
+        <h2>5. Make the Script Executable</h2>
+        <div class="code-container">
+            <code>chmod +x ~/vaultwarden/scripts/bitwarden_backup.sh</code>
+            <button class="copy-btn" onclick="copyToClipboard('chmod +x ~/vaultwarden/scripts/bitwarden_backup.sh')">Copy</button>
+        </div>
+        <h2>6. Test the Script</h2>
+        <div class="code-container">
+            <code>~/vaultwarden/scripts/bitwarden_backup.sh</code>
+            <button class="copy-btn" onclick="copyToClipboard('~/vaultwarden/scripts/bitwarden_backup.sh')">Copy</button>
+        </div>
+        <h2>7. Secure Backup Location</h2>
+        <div class="code-container">
+            <code>chmod 700 ~/vaultwarden/exports</code>
+            <button class="copy-btn" onclick="copyToClipboard('chmod 700 ~/vaultwarden/exports')">Copy</button>
+        </div>
+        <h2>8. Automate the Backup with Cron</h2>
+        <div class="code-container">
+            <code>crontab -e</code>
+            <button class="copy-btn" onclick="copyToClipboard('crontab -e')">Copy</button>
+        </div>
+        <p>Add the following line to schedule the script to run every minute:</p>
+        <div class="code-container">
+            <code>* * * * * USER=example_user /home/example_user/vaultwarden/scripts/bitwarden_backup.sh >> /home/example_user/vaultwarden/scripts/bitwarden_backup_cron.log 2>&1</code>
+            <button class="copy-btn" onclick="copyToClipboard('* * * * * USER=example_user /home/example_user/vaultwarden/scripts/bitwarden_backup.sh >> /home/example_user/vaultwarden/scripts/bitwarden_backup_cron.log 2>&1')">Copy</button>
+        </div>
+        <h2>9. Monitor the Backup Process</h2>
+        <p>Check the cron logs using:</p>
+        <div class="code-container">
+            <code>sudo journalctl | grep CRON</code>
+            <button class="copy-btn" onclick="copyToClipboard('sudo journalctl | grep CRON')">Copy</button>
+        </div>
+        <p>Review the log file:</p>
+        <div class="code-container">
+            <code>cat ~/vaultwarden/scripts/bitwarden_backup_cron.log</code>
+            <button class="copy-btn" onclick="copyToClipboard('cat ~/vaultwarden/scripts/bitwarden_backup_cron.log')">Copy</button>
+        </div>
+    </div>
+
+    <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                alert('Copied to clipboard');
+            }, function() {
+                alert('Failed to copy');
+            });
+        }
+    </script>
+</body>
+</html>

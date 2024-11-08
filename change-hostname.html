@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Change Debian/Ubuntu Hostname</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #FFFFFF;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            text-align: left;
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 20px;
+            padding: 20px;
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        h1, h2 {
+            color: #BB86FC;
+        }
+        p, li {
+            color: #E6E6E6;
+        }
+        a {
+            color: #BB86FC;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        code {
+            font-family: monospace;
+            background-color: #282828;
+            color: #F1F1F1;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+        .code-container, .code-block {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #333333;
+            padding: 8px;
+            border-radius: 4px;
+            margin: 10px 0;
+            position: relative;
+        }
+        .copy-btn {
+            background-color: #BB86FC;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .copy-btn:hover {
+            background-color: #9f6bd9;
+        }
+        pre {
+            background-color: #282828;
+            color: #F1F1F1;
+            padding: 10px;
+            border-radius: 8px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        hr {
+            border: 0;
+            height: 1px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0));
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Change Debian/Ubuntu Hostname</h1>
+        <hr>
+        <h2>1. Create the Script</h2>
+        <p>Open your terminal and create a new script:</p>
+        <div class="code-container">
+            <code>nano change_hostname.sh</code>
+            <button class="copy-btn" onclick="copyToClipboard('nano change_hostname.sh')">Copy</button>
+        </div>
+        <h2>2. Add the Code</h2>
+        <p>Copy and paste the following code into <code>change_hostname.sh</code>:</p>
+        <div class="code-block">
+            <pre id="hostname-script">
+#!/bin/bash
+
+# Validate the hostname
+validate_hostname() {
+    local hostname=$1
+    if [[ $hostname =~ ^[a-zA-Z0-9][-a-zA-Z0-9]*$ ]]; then
+        return 0
+    else
+        echo "Invalid hostname. It can only contain letters, numbers, and hyphens."
+        return 1
+    fi
+}
+
+# Change the hostname
+change_hostname() {
+    local new_hostname=$1
+
+    # Backup current hostname files
+    sudo cp /etc/hostname /etc/hostname.bak
+    sudo cp /etc/hosts /etc/hosts.bak
+
+    # Update hostname
+    echo "$new_hostname" | sudo tee /etc/hostname
+    sudo sed -i "s/$(hostname)/$new_hostname/g" /etc/hosts
+    sudo hostnamectl set-hostname "$new_hostname"
+
+    echo "Hostname changed to $new_hostname"
+    echo "Backup files: /etc/hostname.bak, /etc/hosts.bak"
+}
+
+# Main script
+echo "Current hostname: $(hostname)"
+read -p "Enter the new hostname: " new_hostname
+
+if validate_hostname "$new_hostname"; then
+    change_hostname "$new_hostname"
+else
+    echo "Invalid input. Aborting."
+    exit 1
+fi
+
+# Optional reboot
+read -p "Reboot now? (y/n): " reboot_choice
+if [[ $reboot_choice =~ ^[Yy]$ ]]; then
+    echo "Rebooting..."
+    sudo reboot
+else
+    echo "Reboot later to apply changes."
+fi
+            </pre>
+            <button class="copy-btn" onclick="copyToClipboard(document.getElementById('hostname-script').innerText)">Copy</button>
+        </div>
+        <p>Save and exit (Ctrl + X, then Y, and Enter).</p>
+        <h2>3. Make the Script Executable</h2>
+        <p>Make your script executable:</p>
+        <div class="code-container">
+            <code>chmod +x change_hostname.sh</code>
+            <button class="copy-btn" onclick="copyToClipboard('chmod +x change_hostname.sh')">Copy</button>
+        </div>
+        <h2>4. Run the Script</h2>
+        <p>Run the script:</p>
+        <div class="code-container">
+            <code>sudo ./change_hostname.sh</code>
+            <button class="copy-btn" onclick="copyToClipboard('sudo ./change_hostname.sh')">Copy</button>
+        </div>
+        <p>Follow the on-screen instructions to change your hostname.</p>
+    </div>
+
+    <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                alert('Copied to clipboard');
+            }, function() {
+                alert('Failed to copy');
+            });
+        }
+    </script>
+</body>
+</html>

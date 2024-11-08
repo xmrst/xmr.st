@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>xmr.st</title>
+    <style>
+        /* Centering Body and Container */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #0d0d0d; /* Very dark background color */
+            color: #FFFFFF;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+            padding: 20px;
+            background-color: #1a1a1a; /* Slightly lighter than the body for subtle contrast */
+            border-radius: 8px;
+            text-align: center;
+            box-sizing: border-box; /* Ensures padding doesn’t expand the width */
+        }
+        /* Logo and Link Styling */
+        .logo { font-size: 2.2em; color: #BB86FC; margin: 0.5em 0; }
+        nav a {
+            color: #BB86FC;
+            text-decoration: none;
+            padding: 8px 16px;
+            display: inline-block;
+            font-size: 1em;
+        }
+        nav a:hover {
+            color: #FFFFFF; /* Hover effect to make it stand out */
+        }
+        /* Separator line styling */
+        hr {
+            border: 0;
+            height: 1px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0));
+            margin: 20px 0;
+        }
+        /* About Section */
+        .about {
+            font-size: 1em;
+            color: #E6E6E6;
+            margin-bottom: 20px;
+        }
+    </style>
+    <!-- Prefetch pages for faster navigation -->
+    <link rel="prefetch" href="hosting.html" as="document">
+    <link rel="prefetch" href="pages.html" as="document">
+    <link rel="prefetch" href="contact.html" as="document">
+	<link rel="prefetch" href="change-hostname.html" as="document">
+	<link rel="prefetch" href="docker-portainer.html" as="document">
+	<link rel="prefetch" href="ssh.html" as="document">
+	<link rel="prefetch" href="vaultwarden.html" as="document">
+    <!-- Preload the signal.jpg image -->
+    <link rel="preload" href="/images/signal.jpg" as="image">
+</head>
+<body>
+    <div class="container">
+        <div class="logo">X</div>
+        <div class="about">
+            <p>Born in the '90s and based in North America, I am passionate about technology, particularly system and network administration, and self-hosting. I believe in living a peaceful life, respecting others, and maintaining harmony.</p>
+        </div>
+        <hr>
+        <nav>
+            <a href="hosting.html">Hosting</a> | 
+            <a href="pages.html">Posts</a> | 
+            <a href="contact.html">Contact</a>
+        </nav>
+    </div>
+</body>
+</html>
