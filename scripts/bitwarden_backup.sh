@@ -62,13 +62,13 @@ echo "[\$(date)] Successfully logged into Bitwarden."
 export BW_SESSION
 
 # Unlock the vault
-echo \$BW_PASSWORD | /snap/bin/bw unlock --raw --passwordenv BW_PASSWORD --session \$BW_SESSION > \$HOME/vaultwarden/tmp/bw_session_unlocked
-if [ \$? -ne 0 ]; then
-  echo "[\$(date)] Error: Failed to unlock Bitwarden vault."
+echo $BW_PASSWORD | bw unlock --raw --passwordenv BW_PASSWORD --session $BW_SESSION > /tmp/bw_session_unlocked
+if [ $? -ne 0 ]; then
+  echo "[$(date)] Error: Failed to unlock Bitwarden vault."
   exit 1
 fi
-echo "[\$(date)] Vault unlocked successfully."
-BW_SESSION=\$(cat \$HOME/vaultwarden/tmp/bw_session_unlocked)
+echo "[$(date)] Vault unlocked successfully."
+BW_SESSION=$(cat /tmp/bw_session_unlocked)
 
 # Export the vault with password protection
 bw export --format encrypted_json --raw 1> "$HOME/vaultwarden/exports/vaultwarden-backup.json" --password $EXPORT_PASSWORD --session $BW_SESSION
