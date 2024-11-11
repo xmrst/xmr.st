@@ -61,25 +61,25 @@ fi
 echo "[\$(date)] Successfully logged into Bitwarden."
 export BW_SESSION
 
-# Unlock the vault
-echo $BW_PASSWORD | bw unlock --raw --passwordenv BW_PASSWORD --session $BW_SESSION > /tmp/bw_session_unlocked
-if [ $? -ne 0 ]; then
-  echo "[$(date)] Error: Failed to unlock Bitwarden vault."
+# Unlock the vault and handle permissions
+echo "\$BW_PASSWORD" | /snap/bin/bw unlock --raw --passwordenv BW_PASSWORD --session "\$BW_SESSION" > "\$HOME/vaultwarden/tmp/bw_session_unlocked" 2>/dev/null
+if [ \$? -ne 0 ]; then
+  echo "[\$(date)] Error: Failed to unlock Bitwarden vault."
   exit 1
 fi
-echo "[$(date)] Vault unlocked successfully."
-BW_SESSION=$(cat /tmp/bw_session_unlocked)
+echo "[\$(date)] Vault unlocked successfully."
+BW_SESSION=\$(cat "\$HOME/vaultwarden/tmp/bw_session_unlocked")
 
 # Export the vault with password protection
-bw export --format encrypted_json --raw 1> "$HOME/vaultwarden/exports/vaultwarden-backup.json" --password $EXPORT_PASSWORD --session $BW_SESSION
-if [ $? -ne 0 ]; then
-  echo "[$(date)] Error: Failed to export Bitwarden vault."
+/snap/bin/bw export --format encrypted_json --raw > "\$HOME/vaultwarden/exports/vaultwarden-backup.json" --password "\$EXPORT_PASSWORD" --session "\$BW_SESSION" 2>/dev/null
+if [ \$? -ne 0 ]; then
+  echo "[\$(date)] Error: Failed to export Bitwarden vault."
   exit 1
 fi
-echo "[$(date)] Vault exported successfully to $HOME/vaultwarden/exports/vaultwarden-backup.json."
+echo "[\$(date)] Vault exported successfully to \$HOME/vaultwarden/exports/vaultwarden-backup.json."
 
 # Logout from Bitwarden
-/snap/bin/bw logout --session \$BW_SESSION
+/snap/bin/bw logout --session "\$BW_SESSION" >/dev/null 2>&1
 if [ \$? -ne 0 ]; then
   echo "[\$(date)] Error: Failed to log out from Bitwarden."
   exit 1
@@ -87,7 +87,7 @@ fi
 echo "[\$(date)] Successfully logged out from Bitwarden."
 
 # Cleanup
-rm -f \$HOME/vaultwarden/tmp/bw_session_unlocked
+rm -f "\$HOME/vaultwarden/tmp/bw_session_unlocked"
 echo "[\$(date)] Cleanup completed."
 
 echo "Backup process finished successfully."
