@@ -24,6 +24,7 @@ fi
 # Create necessary directories
 mkdir -p /home/$USERNAME/vaultwarden/scripts
 mkdir -p /home/$USERNAME/vaultwarden/exports
+mkdir -p /home/$USERNAME/vaultwarden/tmp  # Temporary file directory
 
 # Configure Vaultwarden server and confirm
 /snap/bin/bw config server "$VAULTWARDEN_SERVER"
@@ -57,13 +58,13 @@ echo "[\$(date)] Successfully logged into Bitwarden."
 export BW_SESSION
 
 # Unlock the vault
-echo \$BW_PASSWORD | /snap/bin/bw unlock --raw --passwordenv BW_PASSWORD --session \$BW_SESSION > /tmp/bw_session_unlocked
+echo \$BW_PASSWORD | /snap/bin/bw unlock --raw --passwordenv BW_PASSWORD --session \$BW_SESSION > \$HOME/vaultwarden/tmp/bw_session_unlocked
 if [ \$? -ne 0 ]; then
   echo "[\$(date)] Error: Failed to unlock Bitwarden vault."
   exit 1
 fi
 echo "[\$(date)] Vault unlocked successfully."
-BW_SESSION=\$(cat /tmp/bw_session_unlocked)
+BW_SESSION=\$(cat \$HOME/vaultwarden/tmp/bw_session_unlocked)
 
 # Export the vault with password protection
 /snap/bin/bw export --format encrypted_json --raw 1> "\$HOME/vaultwarden/exports/vaultwarden-backup.json" --password \$EXPORT_PASSWORD --session \$BW_SESSION
@@ -82,7 +83,7 @@ fi
 echo "[\$(date)] Successfully logged out from Bitwarden."
 
 # Cleanup
-rm /tmp/bw_session /tmp/bw_session_unlocked
+rm -f \$HOME/vaultwarden/tmp/bw_session_unlocked
 echo "[\$(date)] Cleanup completed."
 
 echo "Backup process finished successfully."
