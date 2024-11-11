@@ -3,8 +3,13 @@
 # Automatically fetch the local user's username
 USERNAME=$(whoami)
 
-# Prompt the user for their Vaultwarden server URL
+# Prompt the user for their Vaultwarden server URL, email, password, and export password
 read -p "Enter your Vaultwarden server URL (e.g., https://vaultwarden.example.com): " VAULTWARDEN_SERVER
+read -p "Enter your Bitwarden email: " BW_EMAIL
+read -s -p "Enter your Bitwarden password: " BW_PASSWORD
+echo
+read -s -p "Enter the password for export file encryption: " EXPORT_PASSWORD
+echo
 
 # Install required packages
 sudo apt update && sudo apt install -y snapd jq
@@ -35,9 +40,9 @@ echo "=== \$(date) ==="
 echo "Starting Vaultwarden backup process..."
 
 # Bitwarden credentials
-export BW_EMAIL="changeme"
-export BW_PASSWORD="changeme"
-EXPORT_PASSWORD="changeme"
+export BW_EMAIL="$BW_EMAIL"
+export BW_PASSWORD="$BW_PASSWORD"
+EXPORT_PASSWORD="$EXPORT_PASSWORD"
 
 # Login to Bitwarden and get session key
 BW_SESSION=\$(bw login --raw --passwordenv BW_PASSWORD \$BW_EMAIL)
@@ -86,8 +91,16 @@ chmod +x /home/$USERNAME/vaultwarden/scripts/bitwarden_backup.sh
 # Secure the backup location
 chmod 700 /home/$USERNAME/vaultwarden/exports
 
-# Automate the backup with cron (replace 'example_user' with actual username)
+# Add the cron job to automate the backup
 (crontab -l 2>/dev/null; echo "* * * * * /home/$USERNAME/vaultwarden/scripts/bitwarden_backup.sh >> /home/$USERNAME/vaultwarden/scripts/bitwarden_backup_cron.log 2>&1") | crontab -
+
+# Verify the cron job has been saved
+if crontab -l | grep -q "/home/$USERNAME/vaultwarden/scripts/bitwarden_backup.sh"; then
+    echo "Cron job added successfully."
+else
+    echo "Error: Failed to add cron job."
+    exit 1
+fi
 
 # Instructions for monitoring the backup process
 echo "To monitor the backup process, check the cron logs using:"
