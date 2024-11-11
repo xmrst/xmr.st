@@ -70,13 +70,13 @@ fi
 echo "[\$(date)] Vault unlocked successfully."
 BW_SESSION=\$(cat \$HOME/vaultwarden/tmp/bw_session_unlocked)
 
-# Export the vault with password protection in encrypted_json format
-/snap/bin/bw export --format encrypted_json --raw > "\$HOME/vaultwarden/exports/vaultwarden-backup.json" --password \$EXPORT_PASSWORD --session \$BW_SESSION
-if [ \$? -ne 0 ]; then
-  echo "[\$(date)] Error: Failed to export Bitwarden vault."
+# Export the vault with password protection
+bw export --format encrypted_json --raw 1> "$HOME/vaultwarden/exports/vaultwarden-backup.json" --password $EXPORT_PASSWORD --session $BW_SESSION
+if [ $? -ne 0 ]; then
+  echo "[$(date)] Error: Failed to export Bitwarden vault."
   exit 1
 fi
-echo "[\$(date)] Vault exported successfully to \$HOME/vaultwarden/exports/vaultwarden-backup.json."
+echo "[$(date)] Vault exported successfully to $HOME/vaultwarden/exports/vaultwarden-backup.json."
 
 # Logout from Bitwarden
 /snap/bin/bw logout --session \$BW_SESSION
