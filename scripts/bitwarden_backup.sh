@@ -3,7 +3,7 @@
 # Automatically fetch the local user's username
 USERNAME=$(whoami)
 
-# Prompt the user for their Vaultwarden server URL, email, password, and export password
+# Prompt for Vaultwarden server URL, email, password, and export password
 read -p "Enter your Vaultwarden server URL (e.g., https://vaultwarden.example.com): " VAULTWARDEN_SERVER
 read -p "Enter your Bitwarden email: " BW_EMAIL
 read -s -p "Enter your Bitwarden password: " BW_PASSWORD
@@ -16,15 +16,18 @@ sudo apt update && sudo apt install -y snapd jq
 sudo snap install bw
 
 # Ensure /snap/bin is in the PATH
-echo 'export PATH=$PATH:/snap/bin' >> ~/.bashrc
-source ~/.bashrc
+if ! echo "$PATH" | grep -q "/snap/bin"; then
+  export PATH="$PATH:/snap/bin"
+  echo 'export PATH=$PATH:/snap/bin' >> ~/.bashrc
+fi
 
 # Create necessary directories
 mkdir -p /home/$USERNAME/vaultwarden/scripts
 mkdir -p /home/$USERNAME/vaultwarden/exports
 
-# Configure Vaultwarden server
-bw config server "$VAULTWARDEN_SERVER"
+# Configure Vaultwarden server and confirm
+/snap/bin/bw config server "$VAULTWARDEN_SERVER"
+/snap/bin/bw config server | grep -q "$VAULTWARDEN_SERVER" || { echo "Failed to set server URL"; exit 1; }
 
 # Create the backup script
 cat << EOF > /home/$USERNAME/vaultwarden/scripts/bitwarden_backup.sh
@@ -45,7 +48,7 @@ export BW_PASSWORD="$BW_PASSWORD"
 EXPORT_PASSWORD="$EXPORT_PASSWORD"
 
 # Login to Bitwarden and get session key
-BW_SESSION=\$(bw login --raw --passwordenv BW_PASSWORD \$BW_EMAIL)
+BW_SESSION=\$(/snap/bin/bw login --raw --passwordenv BW_PASSWORD \$BW_EMAIL)
 if [ \$? -ne 0 ]; then
   echo "[\$(date)] Error: Failed to login to Bitwarden."
   exit 1
@@ -54,7 +57,7 @@ echo "[\$(date)] Successfully logged into Bitwarden."
 export BW_SESSION
 
 # Unlock the vault
-echo \$BW_PASSWORD | bw unlock --raw --passwordenv BW_PASSWORD --session \$BW_SESSION > /tmp/bw_session_unlocked
+echo \$BW_PASSWORD | /snap/bin/bw unlock --raw --passwordenv BW_PASSWORD --session \$BW_SESSION > /tmp/bw_session_unlocked
 if [ \$? -ne 0 ]; then
   echo "[\$(date)] Error: Failed to unlock Bitwarden vault."
   exit 1
@@ -63,7 +66,7 @@ echo "[\$(date)] Vault unlocked successfully."
 BW_SESSION=\$(cat /tmp/bw_session_unlocked)
 
 # Export the vault with password protection
-bw export --format encrypted_json --raw 1> "\$HOME/vaultwarden/exports/vaultwarden-backup.json" --password \$EXPORT_PASSWORD --session \$BW_SESSION
+/snap/bin/bw export --format encrypted_json --raw 1> "\$HOME/vaultwarden/exports/vaultwarden-backup.json" --password \$EXPORT_PASSWORD --session \$BW_SESSION
 if [ \$? -ne 0 ]; then
   echo "[\$(date)] Error: Failed to export Bitwarden vault."
   exit 1
@@ -71,7 +74,7 @@ fi
 echo "[\$(date)] Vault exported successfully to \$HOME/vaultwarden/exports/vaultwarden-backup.json."
 
 # Logout from Bitwarden
-bw logout --session \$BW_SESSION
+/snap/bin/bw logout --session \$BW_SESSION
 if [ \$? -ne 0 ]; then
   echo "[\$(date)] Error: Failed to log out from Bitwarden."
   exit 1
