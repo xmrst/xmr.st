@@ -1,0 +1,15 @@
+services:
+  jellyfin:
+    image: jellyfin/jellyfin
+    container_name: jellyfin
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Chicago
+    volumes:
+      - /path/to/music:/media/music
+      - /path/to/movies:/media/movies
+      - /path/to/tv:/media/tv
+      - /path/to/jellyfin/config:/config
+      - /path/to/jellyfin/cache:/cache
+    restart: unless-stopped

@@ -1,0 +1,61 @@
+services:
+  db:
+    image: mariadb:latest
+    container_name: nextcloud-db
+    restart: unless-stopped
+    volumes:
+      - db_data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=example_root_password
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_PASSWORD=example_db_password
+    networks:
+      - nextcloud_network
+
+  redis:
+    image: redis:alpine
+    container_name: nextcloud-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    networks:
+      - nextcloud_network
+
+  app:
+    image: nextcloud:latest
+    container_name: nextcloud-app
+    restart: unless-stopped
+    volumes:
+      - nextcloud_data:/var/www/html
+    environment:
+      - NEXTCLOUD_ADMIN_USER=your_admin_user
+      - NEXTCLOUD_ADMIN_PASSWORD=your_admin_password
+      - NEXTCLOUD_TRUSTED_DOMAINS=your.domain.com
+      - NEXTCLOUD_DATA_DIR=/var/www/html/data
+      - NEXTCLOUD_TABLE_PREFIX=oc_
+      - NEXTCLOUD_OVERWRITEHOST=your.domain.com
+      - NEXTCLOUD_OVERWRITEPROTOCOL=https
+      - NEXTCLOUD_DB_TYPE=mysql
+      - NEXTCLOUD_DB_HOST=nextcloud-db
+      - NEXTCLOUD_DB_NAME=nextcloud
+      - NEXTCLOUD_DB_USER=nextcloud
+      - NEXTCLOUD_DB_PASSWORD=example_db_password
+      - REDIS_HOST=nextcloud-redis
+      - PHP_UPLOAD_LIMIT=2G
+      - PHP_MAX_EXECUTION_TIME=0
+      - PHP_MAX_INPUT_TIME=0
+    depends_on:
+      - db
+      - redis
+    networks:
+      - nextcloud_network
+
+volumes:
+  db_data:
+  nextcloud_data:
+  redis_data:
+
+networks:
+  nextcloud_network:
+    driver: bridge

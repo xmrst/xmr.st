@@ -1,0 +1,36 @@
+version: '3.8'
+services:
+  app:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    ports:
+      # Existing configuration
+      - '80:80' # Public HTTP Port
+      - '443:443' # Public HTTPS Port
+      - '81:81' # Nginx-Proxy-Manager Admin Web Port
+      - '9050:9050' # Tor Network
+      - '9150:9150' # Public Tor Network Socks5 Proxy
+      - '8080:8080' # Etc Web Port
+      - '3306:3306' # SQL Port
+      - '21:21' # FTP
+      
+      # Added ports for Jellyfin, Sonarr, Radarr, and Requestrr
+      - '8096:8096' # Jellyfin Web Interface
+      - '8920:8920' # Jellyfin HTTPS (optional, if you're using HTTPS)
+      - '8989:8989' # Sonarr
+      - '7878:7878' # Radarr
+      - '4545:4545' # Requestrr
+
+
+    # Uncomment the next line if you uncomment anything in the section
+    # environment:
+      # Uncomment this if you want to change the location of
+      # the SQLite DB file within the container
+      # DB_SQLITE_FILE: "/data/database.sqlite"
+
+      # Uncomment this if IPv6 is not enabled on your host
+      # DISABLE_IPV6: 'true'
+
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
